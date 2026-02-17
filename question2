@@ -1,0 +1,98 @@
+class Student:
+
+    def __init__(self, sid, name, math, phy, chem, bio):
+        self.sid = sid
+        self.name = name
+        self.math = int(math)
+        self.phy = int(phy)
+        self.chem = int(chem)
+        self.bio = int(bio)
+
+    def avg(self):
+        return (self.math + self.phy + self.chem + self.bio) / 4
+
+
+def make_report(in_file, out_file):
+    students = []
+
+    try:
+        with open(in_file, "r") as f:
+            rows = f.readlines()
+
+            for row in rows[1:]:
+                data = row.strip().split(",")
+
+                s = Student(
+                    data[0],
+                    data[1],
+                    data[2],
+                    data[3],
+                    data[4],
+                    data[5]
+                )
+
+                students.append(s)
+
+    except FileNotFoundError:
+        print("File not found.")
+        return
+
+    count = len(students)
+
+    total_math = sum(s.math for s in students)
+    total_phy = sum(s.phy for s in students)
+    total_chem = sum(s.chem for s in students)
+    total_bio = sum(s.bio for s in students)
+
+    avg_math = total_math / count
+    avg_phy = total_phy / count
+    avg_chem = total_chem / count
+    avg_bio = total_bio / count
+
+    overall_avg = (avg_math + avg_phy + avg_chem + avg_bio) / 4
+
+    top3 = sorted(students, key=lambda s: s.avg(), reverse=True)[:3]
+
+    above90 = [
+        s for s in students
+        if s.math > 90 or s.phy > 90 or
+           s.chem > 90 or s.bio > 90
+    ]
+
+    report = []
+    report.append("STUDENT REPORT")
+    report.append("-" * 30)
+    report.append(f"Total: {count}\n")
+
+    report.append("Subject Averages:")
+    report.append(f"Math: {avg_math:.2f}")
+    report.append(f"Physics: {avg_phy:.2f}")
+    report.append(f"Chemistry: {avg_chem:.2f}")
+    report.append(f"Biology: {avg_bio:.2f}\n")
+
+    report.append(f"Overall Avg: {overall_avg:.2f}\n")
+
+    report.append("Top 3:")
+    for s in top3:
+        report.append(f"{s.name} ({s.sid}) - {s.avg():.2f}")
+    report.append("")
+
+    report.append("Scored above 90:")
+    for s in above90:
+        report.append(f"{s.name} ({s.sid})")
+    report.append("")
+
+    report.append("High & Low Scores:")
+    report.append(f"Math -> High: {max(s.math for s in students)}, Low: {min(s.math for s in students)}")
+    report.append(f"Physics -> High: {max(s.phy for s in students)}, Low: {min(s.phy for s in students)}")
+    report.append(f"Chemistry -> High: {max(s.chem for s in students)}, Low: {min(s.chem for s in students)}")
+    report.append(f"Biology -> High: {max(s.bio for s in students)}, Low: {min(s.bio for s in students)}")
+
+    with open(out_file, "w") as f:
+        for line in report:
+            f.write(line + "\n")
+
+    print("Report ready.")
+
+
+make_report("students.csv", "report.txt")
